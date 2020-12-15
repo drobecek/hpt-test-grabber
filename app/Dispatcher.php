@@ -52,7 +52,8 @@ class Dispatcher
             $prices[$item]['price'] = $this->grabber->getPrice($item);
         }
 
-        $this->output->setData($prices);
+         $this->output->setData($prices);
 
+        return $this->output->getJson();
 	}
 }

@@ -1,0 +1,16 @@
+{
+    "name": "ulozto-testdrobecek/hpt-test-grabber",
+    "description": "test issue for interview",
+    "type": "project",
+    "require": {
+        "php": "^7.3"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Petr Jonas",
+            "email": "info@petrjonas.cz"
+        }
+    ],
+    "minimum-stability": "stable"
+}

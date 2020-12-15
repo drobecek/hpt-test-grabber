@@ -1,5 +1,5 @@
 <?php
-
+namespace App;
 
 interface IOutput
 {
@@ -7,6 +7,5 @@ interface IOutput
 	/**
 	 * @return string
 	 */
-	public function getJson();
-
+	public function getJson(): string;
 }

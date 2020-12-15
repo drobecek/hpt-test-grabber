@@ -44,15 +44,18 @@ class Dispatcher
 	public function run()
 	{
         $prices = [];
+        $pricesWithRatings = [];
 
 	    foreach ( $this->items as $item) {
             if(!isset($prices[$item])) {
                 $prices[$item] = [];
             }
-            $prices[$item]['price'] = $this->grabber->getPrice($item);
+            $prices[$item] = new \stdClass();
+            $prices[$item]->price = $this->grabber->getPrice($item);
+            $pricesWithRatings[$item] = $this->grabber->getProduct($item);
         }
 
-         $this->output->setData($prices);
+         $this->output->setData($pricesWithRatings);
 
         return $this->output->getJson();
 	}

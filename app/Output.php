@@ -6,16 +6,22 @@ namespace App;
 
 class Output implements IOutput
 {
-    private $data;
+    private $data = [];
 
-
-    public function setData($data): void
+    public function setData(array $data): void
     {
         $this->data = $data;
     }
 
     public function getJson(): string
     {
-        return json_encode($this->data);
+        $return = new \stdClass();
+        /** @var Product $item */
+        foreach (  $this->data as $item)
+        {
+            $return->{$item->getSku()} = $item->getPriceAndRating();
+        }
+
+        return json_encode($return);
     }
 }

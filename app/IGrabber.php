@@ -10,4 +10,10 @@ interface IGrabber
 	 */
 	public function getPrice(string $productId): ?float;
 
+    /**
+     * @param string $productId
+     * @return Product|null
+     */
+	public function getProduct(string $productId): ?Product;
+
 }

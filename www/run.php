@@ -6,6 +6,7 @@ $files = [
     'Dispatcher.php',
     'CurlGrabber.php',
     'Output.php',
+    'Product.php',
 ];
 
 foreach ($files as $file) {

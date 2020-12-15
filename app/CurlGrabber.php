@@ -14,7 +14,10 @@ class CurlGrabber implements IGrabber
     const PRODUCT_DETAIL_LINK = '//*[@id="tiles"]/div/div/div[2]/div[1]/h5/a';
 
     const PRODUCT_PRICE_ALONE = '//span[@class = "price alone"]';
+
     const PRODUCT_PRICE_DISCOUNT =  '//span[@class = "price action"]';
+
+    const PRODUCT_RATING =  '//span[@class = "rating"]/span[@class = "rating__label"]';
 
 
     public function getPrice($productId) : ?float
@@ -27,17 +30,38 @@ class CurlGrabber implements IGrabber
         $dom =  $this->getPageSource($fullUrl);
         if(FALSE !== $dom)
         {
-            return $this->getFromSearch($dom);
+            $product = new Product($productId);
+            $this->getFromSearch($dom,$product, FALSE);
+            return $product->getPrice();
+        }
+        return NULL;
+    }
+
+    public function getProduct($productId): ?Product
+    {
+        $handle = NULL;
+
+        $fullUrl = self::URI . $productId . self::SUFFIX;
+
+        $dom =  $this->getPageSource($fullUrl);
+        if(FALSE !== $dom)
+        {
+            $product = new Product($productId);
+            $this->getFromSearch($dom,$product, TRUE);
+            return $product;
         }
         return NULL;
     }
 
     /**
      * Parse search page, if is founded parse product detail page
+     *
      * @param DOMDocument $dom
-     * @return float|null
+     * @param Product $product
+     * @param bool $withRating
+     //* @return Product
      */
-    private function getFromSearch(DOMDocument $dom): ?float
+    private function getFromSearch(DOMDocument $dom,Product $product, bool $withRating)
     {
         $xpath = new DOMXPath($dom);
         /** @var \DOMNodeList|false $foundLink */
@@ -56,13 +80,12 @@ class CurlGrabber implements IGrabber
             if($attribute)
             {
                 $domDetail = $this->getPageSource(self::URI . $attribute->value);
-                return $this->parseDetailPage($domDetail);
+                $this->parseDetailPage($domDetail, $product, $withRating);
             }
         }
-        return NULL;
     }
 
-    private function parseDetailPage(DOMDocument $dom)
+    private function parseDetailPage(DOMDocument $dom,Product $product, bool $withRating): void
     {
         $xpath = new DOMXPath($dom);
         /** @var \DOMNodeList|false $foundLink */
@@ -72,7 +95,16 @@ class CurlGrabber implements IGrabber
             $foundElements = $xpath->query(self::PRODUCT_PRICE_DISCOUNT);
         }
 
-        return $this->parsePriceBlock($foundElements->item(0));
+        $product->setPrice($this->parsePriceBlock($foundElements->item(0)));
+        if($withRating)
+        {
+
+            $foundElements = $xpath->query(self::PRODUCT_RATING);
+            if($foundElements->length !== 0)
+            {
+                $product->setRating($this->parseRatingBlock($foundElements->item(0)));
+            }
+        }
     }
 
     /**
@@ -87,6 +119,19 @@ class CurlGrabber implements IGrabber
         $amountText = trim($node->childNodes->item(3)->nodeValue);
         $amountText = str_replace(["\\n",' ',"\u{00a0}","&nbsp;","&NBSP;","NBSP;","Kč"], "", $amountText);
         return floatval($amountText);
+    }
+
+    /**
+     * parse Rating block
+     *
+     * @param DOMNode $node
+     * @return int
+     */
+    private function parseRatingBlock(DOMNode $node): int
+    {
+        $text = trim($node->childNodes->item(0)->nodeValue);
+        $text = str_replace("%", "", $text);
+        return intval(trim($text));
     }
 
     /**
